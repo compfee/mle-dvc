@@ -1,0 +1,64 @@
+schema: '2.0'
+stages:
+  get_data:
+    cmd: python scripts/data.py
+    deps:
+    - path: scripts/data.py
+      hash: md5
+      md5: 9a6e61b6e3b7425869a5b1819710add3
+      size: 1493
+    params:
+      params.yaml:
+        index_col: customer_id
+    outs:
+    - path: data/initial_data.csv
+      hash: md5
+      md5: 9a0a4703ea97ca6be3408aeca8015886
+      size: 820789
+  fit_model:
+    cmd: python scripts/fit.py
+    deps:
+    - path: data/initial_data.csv
+      hash: md5
+      md5: 9a0a4703ea97ca6be3408aeca8015886
+      size: 820789
+    - path: scripts/fit.py
+      hash: md5
+      md5: a0eecf7f251929e4990bf790d5144261
+      size: 2495
+    params:
+      params.yaml:
+        auto_class_weights: Balanced
+        index_col: customer_id
+        one_hot_drop: if_binary
+        target_col: target
+    outs:
+    - path: models/fitted_model.pkl
+      hash: md5
+      md5: aadc5ba266a015c927be6aa1cec337b4
+      size: 1094621
+  evaluate_model:
+    cmd: python scripts/evaluate.py
+    deps:
+    - path: models/fitted_model.pkl
+      hash: md5
+      md5: aadc5ba266a015c927be6aa1cec337b4
+      size: 1094621
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: e9a1dd966133511da900b67ddba73d01
+      size: 1412
+    params:
+      params.yaml:
+        index_col: customer_id
+        metrics:
+        - f1
+        - roc_auc
+        n_jobs: -1
+        n_splits: 5
+        target_col: target
+    outs:
+    - path: cv_results/cv_res.json
+      hash: md5
+      md5: a40c0705a5c33575fa995f0d8d9e620e
+      size: 78
